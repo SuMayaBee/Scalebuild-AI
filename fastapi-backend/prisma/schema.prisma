@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+// User model for authentication and ownership
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  presentations Presentation[]
+  generatedImages GeneratedImage[]
+
+  @@map("users")
+}
+
+// Presentation model for storing slide data
+model Presentation {
+  id          String   @id @default(cuid())
+  title       String
+  content     Json     // Stores slides as JSON
+  theme       String   @default("default")
+  language    String   @default("English")
+  tone        String   @default("Professional")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isPublic    Boolean  @default(false)
+  slug        String?  @unique
+
+  @@map("presentations")
+}
+
+// Generated images model for DALL-E images
+model GeneratedImage {
+  id        String   @id @default(cuid())
+  url       String   // GCS public URL
+  prompt    String   // Original generation prompt
+  model     String   @default("dall-e-3") // AI model used
+  size      String?  // Image dimensions
+  quality   String?  // Image quality setting
+  filename  String?  // GCS filename
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("generated_images")
+}
+
+// Legacy model - keep for backward compatibility
+model User123 {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+}

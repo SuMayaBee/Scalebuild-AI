@@ -1,0 +1,17 @@
+fastapi
+fastapi[standard]
+uvicorn[standard]
+langchain
+langchain-openai
+pydantic
+python-dotenv
+google-cloud-storage
+python-multipart
+openai
+prisma
+requests
+httpx
+python-docx
+reportlab
+Pillow
+asyncio-throttle
