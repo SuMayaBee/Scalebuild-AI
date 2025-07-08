@@ -1,4 +1,4 @@
-Backend setup:
+# Backend setup:
 
 cd fastapi-backend
 python3 -m venv venv
@@ -9,7 +9,7 @@ prisma db push
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 
-Frontend setup:
+# Frontend setup:
 
 pnpm install
 pnpm dev
