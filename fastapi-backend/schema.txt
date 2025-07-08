@@ -1,0 +1,136 @@
+### Database Schema Visualization
+
+**User Table**
+- `id` (Primary Key, e.g., UUID or Auto-increment)
+- `email` (Unique, String) - Used as the foreign key in other tables
+- `name` (String, Nullable)
+- `password_hash` (String)
+- `created_at` (DateTime)
+- `updated_at` (DateTime)
+
+---
+
+**Document & Asset Tables (Connected to User)**
+
+**1. Presentation Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `title` (String)
+- `content` (JSON or Text)
+- `theme` (String)
+- `created_at` (DateTime)
+- `updated_at` (DateTime)
+
+**2. GeneratedImage Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `prompt` (Text)
+- `image_url` (String)
+- `created_at` (DateTime)
+
+**3. Logo Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `company_name` (String)
+- `logo_url` (String)
+- `created_at` (DateTime)
+
+**4. BusinessProposal Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `title` (String)
+- `client_name` (String)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**5. ContractService Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `contract_title` (String)
+- `party_a` (String)
+- `party_b` (String)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**6. NDA (Non-Disclosure Agreement) Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `disclosing_party` (String)
+- `receiving_party` (String)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**7. PartnershipAgreement Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `agreement_title` (String)
+- `partners` (JSON or Text)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**8. PrivacyPolicy Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `company_name` (String)
+- `website_url` (String)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**9. TermsOfService Table**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `company_name` (String)
+- `website_url` (String)
+- `content` (Text)
+- `document_url` (String)
+- `created_at` (DateTime)
+
+**10. ShortVideo Table (Coming Soon)**
+- `id` (Primary Key)
+- `user_email` (Foreign Key -> User.email)
+- `title` (String)
+- `script` (Text)
+- `video_url` (String, Nullable)
+- `status` (String, e.g., "pending", "generating", "complete")
+- `created_at` (DateTime)
+- `updated_at` (DateTime)
+
+---
+
+### ER Diagram (Text-based)
+
+```
++-----------------+
+|      User       |
++-----------------+
+| id (PK)         |
+| email (Unique)  |
+| name            |
+| password_hash   |
+| created_at      |
+| updated_at      |
++-----------------+
+        |
+        | (1)
+        |
++-------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (Many)                                                                                                                                                                  |
+|                                                                                                                                                                         |
++---------------------------+  +--------------------+  +-----------------+  +----------------------+  +---------------------+  +-----------------+  +------------------------+  +------------------+  +------------------+  +------------------+
+|      Presentation         |  |   GeneratedImage   |  |      Logo       |  |   BusinessProposal   |  |   ContractService   |  |       NDA       |  |  PartnershipAgreement  |  |   PrivacyPolicy  |  |  TermsOfService  |  |    ShortVideo    |
++---------------------------+  +--------------------+  +-----------------+  +----------------------+  +---------------------+  +-----------------+  +------------------------+  +------------------+  +------------------+  +------------------+
+| id (PK)                   |  | id (PK)            |  | id (PK)         |  | id (PK)              |  | id (PK)             |  | id (PK)         |  | id (PK)                |  | id (PK)          |  | id (PK)          |  | id (PK)          |
+| user_email (FK to User)   |  | user_email (FK)    |  | user_email (FK) |  | user_email (FK)      |  | user_email (FK)     |  | user_email (FK) |  | user_email (FK)        |  | user_email (FK)  |  | user_email (FK)  |  | user_email (FK)  |
+| title                     |  | prompt             |  | company_name    |  | title                |  | contract_title      |  | disclosing_party|  | agreement_title        |  | company_name     |  | company_name     |  | title            |
+| content                   |  | image_url          |  | logo_url        |  | client_name          |  | party_a             |  | receiving_party |  | partners               |  | website_url      |  | website_url      |  | script           |
+| theme                     |  | created_at         |  | created_at      |  | content              |  | party_b             |  | content         |  | content                |  | content          |  | content          |  | video_url        |
+| created_at                |  +--------------------+  +-----------------+  | document_url         |  | content             |  | document_url    |  | document_url           |  | document_url     |  | document_url     |  | status           |
+| updated_at                |                                             | created_at           |  | document_url        |  | created_at      |  | created_at             |  | created_at       |  | created_at       |  | created_at       |
+|                           |                                             |                      |  | created_at          |  |                 |  |                        |  |                  |  |                  |  | updated_at       |
++---------------------------+                                             +----------------------+  +---------------------+  +-----------------+  +------------------------+  +------------------+  +------------------+  +------------------+
+```
