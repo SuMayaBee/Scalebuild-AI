@@ -71,11 +71,11 @@ async def generate_business_proposal(data: dict):
         # Create professional DOCX
         doc = create_professional_docx(document_content, "Business Proposal")
 
-        # Add logo to header using logo URL from request body
+        # Add logo and page numbers to header using logo URL from request body
         logo_url = data.get("logo_url")
         if logo_url:
             print(f"Logo URL found in request: {logo_url}")
-            add_logo_to_header(doc, logo_url)
+            add_logo_and_page_number_to_header(doc, logo_url)
         else:
             print("No logo URL provided in request data")
 
@@ -246,7 +246,6 @@ def create_professional_docx(content: str, title: str):
 
     # Process content line by line
     lines = content.split('\n')
-    current_section = None
     
     for line in lines:
         line = line.strip()
@@ -258,16 +257,36 @@ def create_professional_docx(content: str, title: str):
             line.startswith('##')):
             # Section heading
             heading = doc.add_paragraph()
-            heading_run = heading.add_run(line.replace('##', '').strip())
+            heading_text = line.replace('##', '').strip()
+            heading_run = heading.add_run(heading_text)
             heading_run.bold = True
             heading_run.font.name = "Times New Roman"
             heading_run.font.size = Pt(14)
-            current_section = line
         else:
-            # Regular paragraph
-            paragraph = doc.add_paragraph(line)
-            paragraph_run = paragraph.runs[0]
-            paragraph_run.font.name = "Times New Roman"
-            paragraph_run.font.size = Pt(12)
+            # Regular paragraph with markdown formatting
+            paragraph = doc.add_paragraph()
+            parse_markdown_to_runs(paragraph, line)
 
     return doc
+
+def parse_markdown_to_runs(paragraph, text):
+    """Parse markdown formatting in text and add formatted runs to paragraph"""
+    import re
+    
+    # Split text by ** markers to identify bold sections
+    parts = re.split(r'(\*\*.*?\*\*)', text)
+    
+    for part in parts:
+        if part.startswith('**') and part.endswith('**'):
+            # Bold text - remove ** markers
+            bold_text = part[2:-2]
+            run = paragraph.add_run(bold_text)
+            run.bold = True
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(12)
+        else:
+            # Regular text
+            if part:  # Only add non-empty parts
+                run = paragraph.add_run(part)
+                run.font.name = "Times New Roman"
+                run.font.size = Pt(12)
