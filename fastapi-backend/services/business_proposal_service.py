@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
-from services.document_utils import save_document_to_gcs
+from services.document_utils import save_docx_to_gcs
 from datetime import datetime
 
 # --- OpenAI Model ---
@@ -39,7 +39,7 @@ business_proposal_prompt = PromptTemplate.from_template(business_proposal_templa
 business_proposal_chain = business_proposal_prompt | model | StrOutputParser()
 
 async def generate_business_proposal(data: dict):
-    """Generate a business proposal document using GPT-4o"""
+    """Generate a business proposal document using GPT-4o and save as .docx with logo"""
     try:
         services_list = ", ".join(data.get("services_offered", []))
         
@@ -57,12 +57,23 @@ async def generate_business_proposal(data: dict):
         }):
             document_content += chunk
         
+        # Save the document as .docx to GCS with logo
+        logo_url = data.get("logo_url")
+        document_url = await save_docx_to_gcs(
+            document_content, 
+            "Business Proposal", 
+            data.get("client_name"),
+            logo_url
+        )
+        
         return {
             "document_content": document_content.strip(),
+            "document_url": document_url,
             "document_type": "Business Proposal",
             "generated_for": data.get("client_name"),
             "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "word_count": len(document_content.split())
+            "word_count": len(document_content.split()),
+            "format": "DOCX with logo"
         }
     except Exception as e:
         print(f"Error in business proposal generation: {e}")

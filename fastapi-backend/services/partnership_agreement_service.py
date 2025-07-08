@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
-from services.document_utils import save_document_to_gcs
+from services.document_utils import save_docx_to_gcs
 from datetime import datetime
 
 # --- OpenAI Model ---
@@ -41,7 +41,7 @@ partnership_agreement_prompt = PromptTemplate.from_template(partnership_agreemen
 partnership_agreement_chain = partnership_agreement_prompt | model | StrOutputParser()
 
 async def generate_partnership_agreement(data: dict):
-    """Generate a partnership agreement document using GPT-4o"""
+    """Generate a partnership agreement document using GPT-4o and save as .docx with logo"""
     try:
         responsibilities1 = ", ".join(data.get("responsibilities_party1", []))
         responsibilities2 = ", ".join(data.get("responsibilities_party2", []))
@@ -61,12 +61,23 @@ async def generate_partnership_agreement(data: dict):
         }):
             document_content += chunk
         
+        # Save the document as .docx to GCS with logo
+        logo_url = data.get("logo_url")
+        document_url = await save_docx_to_gcs(
+            document_content, 
+            "Partnership Agreement", 
+            f"{data.get('party1_name')} & {data.get('party2_name')}",
+            logo_url
+        )
+        
         return {
             "document_content": document_content.strip(),
+            "document_url": document_url,
             "document_type": "Partnership Agreement",
             "generated_for": f"{data.get('party1_name')} & {data.get('party2_name')}",
             "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "word_count": len(document_content.split())
+            "word_count": len(document_content.split()),
+            "format": "DOCX with logo"
         }
     except Exception as e:
         print(f"Error in partnership agreement generation: {e}")

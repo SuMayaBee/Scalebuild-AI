@@ -16,8 +16,7 @@ from services.document_generation_service import (
     generate_nda,
     generate_contract,
     generate_terms_of_service,
-    generate_privacy_policy,
-    save_document_to_gcs
+    generate_privacy_policy
 )
 import json
 
@@ -28,15 +27,6 @@ async def create_business_proposal(request: BusinessProposalRequest):
     """Generate a comprehensive business proposal document using GPT-4o"""
     try:
         result = await generate_business_proposal(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -46,15 +36,6 @@ async def create_partnership_agreement(request: PartnershipAgreementRequest):
     """Generate a comprehensive partnership agreement document using GPT-4o"""
     try:
         result = await generate_partnership_agreement(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -64,15 +45,6 @@ async def create_nda(request: NDARequest):
     """Generate a comprehensive Non-Disclosure Agreement using GPT-4o"""
     try:
         result = await generate_nda(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -82,15 +54,6 @@ async def create_contract(request: ContractRequest):
     """Generate a comprehensive Contract using GPT-4o"""
     try:
         result = await generate_contract(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -100,15 +63,6 @@ async def create_terms_of_service(request: TermsOfServiceRequest):
     """Generate comprehensive Terms of Service using GPT-4o"""
     try:
         result = await generate_terms_of_service(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -118,15 +72,6 @@ async def create_privacy_policy(request: PrivacyPolicyRequest):
     """Generate a comprehensive Privacy Policy using GPT-4o"""
     try:
         result = await generate_privacy_policy(request.dict())
-        
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -150,14 +95,6 @@ async def generate_document(request: DocumentGenerationRequest):
         else:
             raise HTTPException(status_code=400, detail="Invalid document type")
         
-        # Save to GCS
-        document_url = await save_document_to_gcs(
-            result["document_content"],
-            result["document_type"],
-            result["generated_for"]
-        )
-        result["document_url"] = document_url
-        
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -173,18 +110,6 @@ async def create_business_proposal_stream(request: BusinessProposalRequest):
             }) + "\n\n"
             
             result = await generate_business_proposal(request.dict())
-            
-            yield "data: " + json.dumps({
-                "status": "saving", 
-                "message": "Saving document to cloud storage..."
-            }) + "\n\n"
-            
-            document_url = await save_document_to_gcs(
-                result["document_content"],
-                result["document_type"],
-                result["generated_for"]
-            )
-            result["document_url"] = document_url
             
             yield "data: " + json.dumps({
                 "status": "complete", 
@@ -212,18 +137,6 @@ async def create_partnership_agreement_stream(request: PartnershipAgreementReque
             result = await generate_partnership_agreement(request.dict())
             
             yield "data: " + json.dumps({
-                "status": "saving", 
-                "message": "Saving document to cloud storage..."
-            }) + "\n\n"
-            
-            document_url = await save_document_to_gcs(
-                result["document_content"],
-                result["document_type"],
-                result["generated_for"]
-            )
-            result["document_url"] = document_url
-            
-            yield "data: " + json.dumps({
                 "status": "complete", 
                 "data": result
             }) + "\n\n"
@@ -247,18 +160,6 @@ async def create_nda_stream(request: NDARequest):
             }) + "\n\n"
             
             result = await generate_nda(request.dict())
-            
-            yield "data: " + json.dumps({
-                "status": "saving", 
-                "message": "Saving document to cloud storage..."
-            }) + "\n\n"
-            
-            document_url = await save_document_to_gcs(
-                result["document_content"],
-                result["document_type"],
-                result["generated_for"]
-            )
-            result["document_url"] = document_url
             
             yield "data: " + json.dumps({
                 "status": "complete", 

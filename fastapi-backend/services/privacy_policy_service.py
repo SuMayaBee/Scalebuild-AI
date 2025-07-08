@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
-from services.document_utils import save_document_to_gcs
+from services.document_utils import save_docx_to_gcs
 from datetime import datetime
 
 # --- OpenAI Model ---
@@ -44,7 +44,7 @@ privacy_policy_prompt = PromptTemplate.from_template(privacy_policy_template)
 privacy_policy_chain = privacy_policy_prompt | model | StrOutputParser()
 
 async def generate_privacy_policy(data: dict):
-    """Generate Privacy Policy document using GPT-4o"""
+    """Generate Privacy Policy document using GPT-4o and save as .docx with logo"""
     try:
         data_collected_list = ", ".join(data.get("data_collected", []))
         data_usage_list = ", ".join(data.get("data_usage_purpose", []))
@@ -67,12 +67,23 @@ async def generate_privacy_policy(data: dict):
         }):
             document_content += chunk
         
+        # Save the document as .docx to GCS with logo
+        logo_url = data.get("logo_url")
+        document_url = await save_docx_to_gcs(
+            document_content, 
+            "Privacy Policy", 
+            data.get("company_name"),
+            logo_url
+        )
+        
         return {
             "document_content": document_content.strip(),
+            "document_url": document_url,
             "document_type": "Privacy Policy",
             "generated_for": data.get("company_name"),
             "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "word_count": len(document_content.split())
+            "word_count": len(document_content.split()),
+            "format": "DOCX with logo"
         }
     except Exception as e:
         print(f"Error in Privacy Policy generation: {e}")

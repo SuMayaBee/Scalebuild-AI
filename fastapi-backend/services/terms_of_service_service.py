@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
-from services.document_utils import save_document_to_gcs
+from services.document_utils import save_docx_to_gcs
 from datetime import datetime
 
 # --- OpenAI Model ---
@@ -46,7 +46,7 @@ terms_of_service_prompt = PromptTemplate.from_template(terms_of_service_template
 terms_of_service_chain = terms_of_service_prompt | model | StrOutputParser()
 
 async def generate_terms_of_service(data: dict):
-    """Generate Terms of Service document using GPT-4o"""
+    """Generate Terms of Service document using GPT-4o and save as .docx with logo"""
     try:
         user_responsibilities_list = ", ".join(data.get("user_responsibilities", []))
         prohibited_activities_list = ", ".join(data.get("prohibited_activities", []))
@@ -67,12 +67,23 @@ async def generate_terms_of_service(data: dict):
         }):
             document_content += chunk
         
+        # Save the document as .docx to GCS with logo
+        logo_url = data.get("logo_url")
+        document_url = await save_docx_to_gcs(
+            document_content, 
+            "Terms of Service", 
+            data.get("company_name"),
+            logo_url
+        )
+        
         return {
             "document_content": document_content.strip(),
+            "document_url": document_url,
             "document_type": "Terms of Service",
             "generated_for": data.get("company_name"),
             "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "word_count": len(document_content.split())
+            "word_count": len(document_content.split()),
+            "format": "DOCX with logo"
         }
     except Exception as e:
         print(f"Error in Terms of Service generation: {e}")

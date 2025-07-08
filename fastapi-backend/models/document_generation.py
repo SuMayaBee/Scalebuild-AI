@@ -12,6 +12,7 @@ class BusinessProposalRequest(BaseModel):
     budget_range: str
     contact_person: str
     contact_email: str
+    logo_url: Optional[str] = None
 
 class PartnershipAgreementRequest(BaseModel):
     party1_name: str
@@ -24,6 +25,7 @@ class PartnershipAgreementRequest(BaseModel):
     responsibilities_party1: List[str]
     responsibilities_party2: List[str]
     effective_date: str
+    logo_url: Optional[str] = None
 
 class NDARequest(BaseModel):
     disclosing_party: str
@@ -33,6 +35,7 @@ class NDARequest(BaseModel):
     duration: str
     governing_law: str
     effective_date: str
+    logo_url: Optional[str] = None
 
 class ContractRequest(BaseModel):
     contract_type: str  # "service", "employment", "vendor", etc.
@@ -47,6 +50,7 @@ class ContractRequest(BaseModel):
     deliverables: List[str]
     terms_conditions: List[str]
     effective_date: str
+    logo_url: Optional[str] = None
 
 class TermsOfServiceRequest(BaseModel):
     company_name: str
@@ -60,6 +64,7 @@ class TermsOfServiceRequest(BaseModel):
     limitation_of_liability: str
     governing_law: str
     contact_email: str
+    logo_url: Optional[str] = None
 
 class PrivacyPolicyRequest(BaseModel):
     company_name: str
@@ -74,6 +79,7 @@ class PrivacyPolicyRequest(BaseModel):
     contact_email: str
     governing_law: str
     effective_date: str
+    logo_url: Optional[str] = None
 
 class DocumentResponse(BaseModel):
     document_content: str

@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
-from services.document_utils import save_document_to_gcs
+from services.document_utils import save_docx_to_gcs
 from datetime import datetime
 
 # --- OpenAI Model ---
@@ -44,7 +44,7 @@ contract_prompt = PromptTemplate.from_template(contract_template)
 contract_chain = contract_prompt | model | StrOutputParser()
 
 async def generate_contract(data: dict):
-    """Generate a contract document using GPT-4o"""
+    """Generate a contract document using GPT-4o and save as .docx with logo"""
     try:
         deliverables_list = ", ".join(data.get("deliverables", []))
         terms_list = ", ".join(data.get("terms_conditions", []))
@@ -66,12 +66,23 @@ async def generate_contract(data: dict):
         }):
             document_content += chunk
         
+        # Save the document as .docx to GCS with logo
+        logo_url = data.get("logo_url")
+        document_url = await save_docx_to_gcs(
+            document_content, 
+            f"{data.get('contract_type', 'Service')} Contract", 
+            f"{data.get('party1_name')} & {data.get('party2_name')}",
+            logo_url
+        )
+        
         return {
             "document_content": document_content.strip(),
+            "document_url": document_url,
             "document_type": f"{data.get('contract_type', 'Service')} Contract",
             "generated_for": f"{data.get('party1_name')} & {data.get('party2_name')}",
             "creation_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "word_count": len(document_content.split())
+            "word_count": len(document_content.split()),
+            "format": "DOCX with logo"
         }
     except Exception as e:
         print(f"Error in contract generation: {e}")
